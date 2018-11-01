@@ -3,6 +3,10 @@ variable "aws_region" {
   
 }
 
+variable "vpcflowlogsrole_arn" {
+  description = "ARN of VPC FlowLog"
+ }
+
 variable "availability_zones" {
   description = "Availability zones to use"
   default = {

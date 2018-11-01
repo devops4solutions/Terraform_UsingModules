@@ -1,49 +1,65 @@
+resource "aws_key_pair" "auth" {
+  key_name   = "${var.ssh_key_name}"
+  public_key = "${file(var.ssh_public_key)}"
+}
+
+resource "aws_instance" "proxy" {
+
+  connection {
+    type = "ssh"
+    user = "ubuntu"
+	host = "${aws_instance.proxy.public_ip}" 
+	}
+
+  instance_type = "${var.instance_type}"
+
+  ami = "${var.aws_amis}"
+  key_name = "${aws_key_pair.auth.id}" 
+
+  vpc_security_group_ids = ["${var.proxy_security_groups}"]
+  associate_public_ip_address = "true"
+
+  subnet_id = "${var.public_subnet_id}"
+
+  tags {
+    "Name" = "${var.tenant}-${var.environment}-Proxy"
+    "Terraform" = "True"
+    "Role" = "Proxy"
+    "Environment" = "${var.environment}"
+    "Tenant" = "${var.tenant}"
+  }
+
+ 
+}
+
 resource "aws_instance" "bastion" {
 
   connection {
     type = "ssh"
     user = "ubuntu"
-    private_key = "${base64decode(var.ssh_private_key)}"
+	host = "${aws_instance.bastion.public_ip}"
+  //  private_key = "${base64decode(var.ssh_private_key)}"
   }
 
   instance_type = "${var.instance_type}"
 
   ami = "${var.aws_amis}"
-  key_name = "${var.ssh_key_name}"
+  key_name = "${aws_key_pair.auth.id}" 
 
   vpc_security_group_ids = ["${var.bastion_security_groups}"]
+  associate_public_ip_address = "true"
 
-  subnet_id = "${var.subnet_id}"
-
- // user_data = "${file("${path.module}/cloud-config/sandbox-bastion.yml")}"
+  subnet_id = "${var.public_subnet_id}"
 
   tags {
-    "Name" = "${var.name_prefix}-bastion"
+    "Name" = "${var.tenant}-${var.environment}-bastion"
     "Terraform" = "True"
-    "Chef" = "True"
     "Role" = "Bastion"
     "Environment" = "${var.environment}"
     "Tenant" = "${var.tenant}"
   }
 
- /* provisioner "file" {
-    content = "${var.chef_data_bag_secret}"
-    destination = "/home/ubuntu/chef_data_bag_secret"
-  }
-
-  provisioner "file" {
-    content = "${base64decode(var.ssh_private_key)}"
-    destination = "/home/ubuntu/.ssh/id_rsa.terraform"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo mv /home/ubuntu/chef_data_bag_secret /etc/chef/data_bag_secret",
-      "sudo mv /home/ubuntu/.ssh/id_rsa.terraform /etc/chef/id_rsa.terraform",
-      "sudo chown -R root:root /etc/chef/",
-      "sudo chmod 0600 /etc/chef/id_rsa.terraform"
-    ]
-  } */
+ 
 }
 
 resource "aws_instance" "sandbox" {
@@ -51,17 +67,20 @@ resource "aws_instance" "sandbox" {
   connection {
     type = "ssh"
     user = "ubuntu"
-    private_key = "${base64decode(var.ssh_private_key)}"
+	// host = "${aws_instance.sandbox.public_ip}"
+   // public_key = "${base64decode(var.ssh_public_key)}"
   }
 
   instance_type = "${var.instance_type}"
+ // associate_public_ip_address = "true"
 
  ami = "${var.aws_amis}"
-  key_name = "${var.ssh_key_name}"
+   key_name = "${aws_key_pair.auth.id}" 
 
   vpc_security_group_ids = ["${var.sandbox_security_groups}"]
+  
+    subnet_id = "${var.private_subnet_id}"
 
-  subnet_id = "${var.subnet_id}"
 
   root_block_device = {
     volume_size = "${var.sandbox_root_storage_allocation}"
@@ -80,41 +99,13 @@ resource "aws_instance" "sandbox" {
     }
   ]
 
-  //user_data = "${file("${path.module}/cloud-config/sandbox-web.yml")}"
-
   tags {
-    "Name" = "${var.name_prefix}-sandbox"
+    "Name" = "${var.tenant}-${var.environment}-sandbox"
     "Terraform" = "True"
-    "Chef" = "True"
     "Role" = "Hosting-Sandbox-Shared"
     "Environment" = "${var.environment}"
     "Tenant" = "${var.tenant}"
   }
 
- /* provisioner "file" {
-    content = "${var.chef_data_bag_secret}"
-    destination = "/home/ubuntu/chef_data_bag_secret"
-  }
-
-  provisioner "file" {
-    content = "${base64decode(var.ssh_private_key)}"
-    destination = "/home/ubuntu/.ssh/id_rsa.terraform"
-  }
-
-  provisioner "file" {
-    content = "${base64decode(var.deploy_ssh_private_key)}"
-    destination = "/home/ubuntu/.ssh/id_rsa.deploy"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo mv /home/ubuntu/chef_data_bag_secret /etc/chef/data_bag_secret",
-      "sudo mv /home/ubuntu/.ssh/id_rsa.terraform /etc/chef/id_rsa.terraform",
-      "sudo mv /home/ubuntu/.ssh/id_rsa.deploy /etc/chef/id_rsa.deploy",
-      "sudo chown -R root:root /etc/chef/",
-      "sudo chmod 0600 /etc/chef/data_bag_secret",
-      "sudo chmod 0600 /etc/chef/id_rsa.terraform",
-      "sudo chmod 0600 /etc/chef/id_rsa.deploy"
-    ]
-  } */
+ 
 }

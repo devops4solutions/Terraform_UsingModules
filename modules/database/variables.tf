@@ -2,6 +2,14 @@ variable "identifier" {
   description = "string to use as identifier for RDS instances"
 }
 
+variable "tenant" {
+  description = "tenant"
+}
+
+variable "environment" {
+  description = "environment"
+}
+
 variable "db_port" {
   description = "DB port"
   
@@ -19,6 +27,13 @@ variable "engine" {
   description = "Database engine to use"
 }
 
+variable "db_subnet_id" {
+  description = "Database subnet to use"
+}
+
+variable "db_subnet_2_id" {
+  description = "Database subnet to use"
+}
 variable "engine_version" {
   description = "Database version to use for the given engine"
 }

@@ -8,9 +8,22 @@ variable "vpc_cidr" {
   default = "11.0.0.0/16"
 }
 
+variable "IAM_CrossAccountRole" {
+  description = "Role created on the environment to get assumes from the devops account"
+  default = "arn:aws:iam::106231631067:role/Devops_CrossAccountRole"
+}
+
+variable "BucketName_Terraform" {
+  description = "Bucket name which is used to store Terraform remote state file"
+  default = "terraform-kpdi-development"
+}
+
+
+
+
 variable "aws_amis" {
   default = {
-    us-east-1 = "ami-06b5810be11add0e2"
+    us-east-1 = "ami-0ac019f4fcb7cb7e6"
   }
 }
 
@@ -33,7 +46,7 @@ variable "ssh_key_name" {
 
 variable "ssh_public_key" {
   description = "Base64 encoded public key string"
-  default="NA"
+  default="../terraform-deploy.pub"
 }
 
 variable "ssh_private_key" {
@@ -51,15 +64,11 @@ variable "install_deploy_ssh_private_key" {
   default = true
 }
 
-variable "chef_data_bag_secret_key" {
-  description = "secret key for chef decrypting chef data bag items"
-  default="NA"
- 
-}
+
 
 variable "instance_name_prefix" {
   description = "Prefix to use for generated EC2 instances"
-  default = "TestBastion"
+  default = "Instance"
 }
 
 variable "instance_type" {
@@ -90,7 +99,7 @@ variable "sandbox_storage_delete_on_termination" {
 
 variable "sg_name_prefix" {
   description = "Prefix to use for generated security group names"
-  default = "Test-Terraform"
+  default = ""
 }
 
 variable "db_identifier" {
@@ -104,9 +113,15 @@ variable "db_root_user" {
   default = "root"
 }
 
+variable "vault_path"
+{
+   description="path of valut secret"
+   default ="secret/CLIENTS/DEMO/DEVELOPMENT"
+}
+
 variable "db_root_password" {
   description = "Password to use for administration of RDS database"
-  default = "root"
+  default = "mysqlroot"
 }
 
 variable "db_engine" {

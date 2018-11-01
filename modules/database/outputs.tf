@@ -1,4 +1,3 @@
-output "this_db_instance_address" {
-  description = "The address of the RDS instance"
-  value       = "${module.database.this_db_instance_address}"
+output "db_instance_address" {
+  value = "${aws_db_instance.mysqlDbInstance.address}"
 }

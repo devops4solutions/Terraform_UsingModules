@@ -31,3 +31,15 @@ module "vpc" {
     Tenant = "${var.tenant}"
   }
 }
+
+resource "aws_flow_log" "vpc_flow_log" {
+  log_group_name = "${aws_cloudwatch_log_group.vpc_cloudwatch_log_group.name}"
+  iam_role_arn   = "${var.vpcflowlogsrole_arn}"
+  vpc_id         = "${module.vpc.vpc_id}"
+  traffic_type   = "ALL"
+}
+
+resource "aws_cloudwatch_log_group" "vpc_cloudwatch_log_group" {
+  name = "${join("-", list(lower(var.tenant), "vpc_cloudwatch_log_group", lower(var.environment)))}"
+}
+
